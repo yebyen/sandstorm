@@ -1,19 +1,16 @@
-<!--
-
-(Using an HTML comment to comment out documentation that we want users not
-to see, but that I want to write right now.
-
 ## Sandstorm and HTTPS
 
 ### Automatic HTTPS for Sandcats.io users (PROPOSED)
 
-**NOTE**: This section documents PROPOSED NEW behavior of Sandstorm, not behavior that works today.
+**NOTE**: This section documents PROPOSED NEW behavior of Sandstorm,
+not behavior that works today. Skip this section if you want
+documentation you can use today.
 
 For new Sandstorm installations, HTTPS is (in the future) enabled by
 default. Sandstorm listens on port 443 for HTTPS connections and port
 80 for HTTP connections.
 
-When HTTPS mode is enabled (by setting the `HTTPS_PORT` configuration
+When HTTPS mode is enabled (by setting the `HTTPS_PORT=443` configuration
 option), the Sandstorm software (in the future) uses port 443 for all
 traffic to the Sandstorm shell. If any requests come in on port 80,
 Sandstorm serves a HTTP redirect.
@@ -40,56 +37,31 @@ This process will require reconfiguring any OAuth login providers like
 Google or GitHub, so it may take you up to thirty minutes to complete.
 
 First, enable HTTPS by (in the future) by modifying your Sandstorm
-configuration file (`sudo nano -w /opt/sandstorm/sandstorm.conf`) to add a
-`HTTPS_PORT=` configuration value as follows.
+configuration file (`sudo nano -w /opt/sandstorm/sandstorm.conf`) to
+add a `HTTPS_PORT=` and adjust your BASE_URL by setting these
+configuration options.
 
 ```bash
-HTTPS_PORT=443
-```
-
-Now, stop and start Sandstorm:
-
-```bash
-sudo sandstorm stop
-sudo sandstorm start
-```
-
-Sandstorm will continue to operate as before on port 6080. In
-addition, Sandstorm will log a message in
-`/opt/sandstorm/var/log/sandstorm.log` indicating it is retrieving a
-HTTPS certificate for you to use. This process can take about two
-minutes. You can read that log by running:
-
-```bash
-sudo tail -f /opt/sandstorm/var/log/sandstorm.log
-```
-
-Once you see a message indicating `Sandstorm has successfully received
-a HTTPS certificate`, it is safe to reconfigure Sandstorm to use HTTPS
-by default. To do that, make the following changes to your
-`sandstorm.conf` file.
-
-```bash
-PORT=80,6080
 HTTPS_PORT=443
 BASE_URL=https://example.sandcats.io
 WILDCARD_HOST=*.example.sandcats.io
 ```
 
-If you chose the default HTTPS port (443), you do not need to specify
-a port number in the `BASE_URL` or `WILDCARD_HOST`. We recommend this
-configuration with multiple `PORT=` values so that Sandstorm listens
-on two standard ports, 443 (HTTPS) and 80 (HTTP), and still listens on
-port 6080 in case anyone else links to your server on port 6080.
+(If you stick to the default `HTTPS_PORT` of 443, then you do not need
+to specify a port number in the `BASE_URL` or `WILDCARD_HOST`.)
 
-Having made these changes, you will need to restart Sandstorm.
+Now, stop and start Sandstorm:
 
 ```bash
-sudo sandstorm stop
-sudo sandstorm start
+sudo sandstorm restart
 ```
 
-You can now visit your
+Sandstorm will begin to set up HTTPS, and if you want to watch the
+process, you can run this command:
+
+```bash
+sudo tail -f /opt/sandstorm/var/log/sandstorm.log
+```
 
 *NOTE* that if you had Google or GitHub login enabled (or other OAuth
 providers), the change in `BASE_URL` means that you need to
@@ -100,12 +72,43 @@ mode by running:
 sudo sandstorm admin-token
 ```
 
-and follow the prompts to configure Google and/or GitHub login
-again. Once you have saved those settings, sign in via the top-right
-corner of Sandstorm.
+Once you are viewing the admin page, disable and then re-enable
+GitHub, Google, and any other OAuth-based login providers. This
+process will typically require visiting the Google and GitHub
+websites.
 
-**Congratulations!** You're now using HTTPS, also known as TLS and
-SSL.
+Once you have saved those settings, you can sign in with a Google or
+GitHub account corner of your Sandstorm server as usual.
+
+**Congratulations!** You're now using HTTPS, also known as SSL and TLS.
+
+**BONUS**: Sandstorm can listen on port 80. To make it do that, adjust
+your configuration as follows, changing:
+
+```bash
+PORT=6080
+```
+
+to
+
+```bash
+PORT=80,6080
+```
+
+and then restart Sandstorm with:
+
+```bash
+sudo sandstorm restart
+```
+
+Having made these changes, you will need to restart Sandstorm.
+
+```bash
+sudo sandstorm stop
+sudo sandstorm start
+```
+
+If you do the above steps, you will need no HTTP reverse proxy.
 
 ### How multiple ports affect the shell, grains, and static publishing
 
@@ -129,8 +132,6 @@ consider turning off port 6080 by removing it from the `PORT=` line.
 If you think the Sandstorm code should support something more
 complicated involving (for example) HTTP redirects, please file a bug
 so we can make sure we're serving your needs.
-
--->
 
 ## Self-hosted HTTPS with a custom certificate authority
 
